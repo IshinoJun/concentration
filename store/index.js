@@ -15,7 +15,7 @@ export const mutations = {
     state.rooms = [...state.rooms, room]
   },
   openCard(state, { roomId, src }) {
-    state.rooms = state.rooms.map((room, i) => {
+  state.rooms = state.rooms.map((room, i) => {
       if (i === roomId) {
         return {
           cards: room.cards.map((card) => {
@@ -23,6 +23,24 @@ export const mutations = {
               ? {
                 ...card,
                 opened: true
+              }
+              : card
+          })
+        }
+      } else {
+        return room
+      }
+    })
+  },
+  closeCard(state, { roomId, src }) {
+    state.rooms = state.rooms.map((room, i) => {
+      if (i === roomId) {
+        return {
+          cards: room.cards.map((card) => {
+            return card.src === src
+              ? {
+                ...card,
+                opened: false
               }
               : card
           })

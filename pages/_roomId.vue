@@ -1,5 +1,5 @@
 <template>
-  <div class="board">{{roomId}}
+  <div class="board">
     <template v-if="$store.state.rooms[roomId]">
       <img
         v-for="card in $store.state.rooms[roomId].cards"
@@ -52,9 +52,21 @@ export default {
       })
     }
   },
+  data() {
+    return {
+      count: 0
+    }
+  },
   methods: {
     openCard(src) {
+      this.count++
       this.$store.commit('openCard', { roomId: this.roomId, src })
+      if (this.count%2 === 0) {
+        setTimeout(() => {
+          console.log(src)
+          this.$store.commit('closeCard', { roomId: this.roomId, src })
+        }, 2000)
+      }
     }
   }
 }
