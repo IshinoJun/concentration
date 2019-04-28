@@ -3,13 +3,13 @@ const consola = require('consola')
 const { Nuxt, Builder } = require('nuxt')
 const bodyParser = require('body-parser')
 const app = express()
-  // CORSを許可する
-  app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    next();
-  });
 const apiRouter = require('./api')
+// CORSを許可する
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
 
 // Import and Set Nuxt.js options
 const config = require('../nuxt.config.js')
