@@ -11,15 +11,15 @@ export const mutations = {
 
 export const actions = {
   async fetchRoom(store, roomId) {
-    const roomInfo = await this.$axios.$get(`/api/rooms/${roomId}`)
+    const roomInfo = await this.$axios.$get(`https://app-concentration.herokuapp.com/api/rooms/${roomId}`)
     store.commit('setRoom', { room: roomInfo, roomId })
   },
   async checkRoom(store, roomId) {
-    let room = await this.$axios.$get(`/api/rooms/${roomId}`)
+    let room = await this.$axios.$get(`https://app-concentration.herokuapp.com/api/rooms/${roomId}`)
 
     if (!room) {
-      await this.$axios.$post(`/api/rooms/${roomId}`)
-      room = await this.$axios.$get(`/api/rooms/${roomId}`)
+      await this.$axios.$post(`https://app-concentration.herokuapp.com/api/rooms/${roomId}`)
+      room = await this.$axios.$get(`https://app-concentration.herokuapp.com/api/rooms/${roomId}`)
     }
 
     store.commit('setRoom', { room, roomId })
@@ -34,7 +34,7 @@ export const actions = {
         return card
       }
     })
-    await this.$axios.$put(`/api/rooms/${roomId}`, room)
+    await this.$axios.$put(`https://app-concentration.herokuapp.com/api/rooms/${roomId}`, room)
 
     await store.dispatch('fetchRoom', roomId)
   },
@@ -48,7 +48,7 @@ export const actions = {
         return card
       }
     })
-    await this.$axios.$put(`/api/rooms/${roomId}`, room)
+    await this.$axios.$put(`https://app-concentration.herokuapp.com/api/rooms/${roomId}`, room)
 
     await store.dispatch('fetchRoom', roomId)
   },
@@ -62,7 +62,7 @@ export const actions = {
         return card
       }
     })
-    await this.$axios.$put(`/api/rooms/${roomId}`, room)
+    await this.$axios.$put(`https://app-concentration.herokuapp.com/api/rooms/${roomId}`, room)
 
     await store.dispatch('fetchRoom', roomId)
   }
