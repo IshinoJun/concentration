@@ -3,6 +3,12 @@ const consola = require('consola')
 const { Nuxt, Builder } = require('nuxt')
 const bodyParser = require('body-parser')
 const app = express()
+  // CORSを許可する
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    next();
+  });
 const apiRouter = require('./api')
 
 // Import and Set Nuxt.js options
@@ -29,13 +35,6 @@ async function start() {
   // Give nuxt middleware to express
   app.use('/api', apiRouter)
   app.use(nuxt.render)
-
-  // CORSを許可する
-  app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    next();
-  });
 
   // Listen the server
   app.listen(port, host)
