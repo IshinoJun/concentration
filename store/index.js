@@ -1,53 +1,69 @@
 export const state = () => ({
-  rooms: JSON.parse(localStorage.trump_data || '[]')
+  rooms: []
 })
 
-export const plugins = [
-  (store) => {
-    store.subscribe(() => {
-      localStorage.trump_data = JSON.stringify(store.state.rooms)
-    })
-  }
-]
-
 export const mutations = {
-  addRoom(state, room) {
-    state.rooms = [...state.rooms, room]
+  setRoom(state, { room, roomId }) {
+    state.rooms = [...state.rooms]
+    state.rooms[roomId] = room
+  }
+}
+
+export const actions = {
+  async fetchRoom(store, roomId) {
+    const roomInfo = await this.$axios.$get(`/api/rooms/${roomId}`)
+    store.commit('setRoom', { room: roomInfo, roomId })
   },
-  openCard(state, { roomId, src }) {
-  state.rooms = state.rooms.map((room, i) => {
-      if (i === roomId) {
-        return {
-          cards: room.cards.map((card) => {
-            return card.src === src
-              ? {
-                ...card,
-                opened: true
-              }
-              : card
-          })
-        }
+  async checkRoom(store, roomId) {
+    let room = await this.$axios.$get(`/api/rooms/${roomId}`)
+
+    if (!room) {
+      await this.$axios.$post(`/api/rooms/${roomId}`)
+      room = await this.$axios.$get(`/api/rooms/${roomId}`)
+    }
+
+    store.commit('setRoom', { room, roomId })
+  },
+  async openCard(store, { roomId, num }) {
+    const room = { ...store.state.rooms[roomId] }
+    room.turn = 1 - room.turn
+    room.cards = room.cards.map((card) => {
+      if (card.num === num) {
+        return { ...card, opened: true }
       } else {
-        return room
+        return card
       }
     })
+    await this.$axios.$put(`/api/rooms/${roomId}`, room)
+
+    await store.dispatch('fetchRoom', roomId)
   },
-  closeCard(state, { roomId, src }) {
-    state.rooms = state.rooms.map((room, i) => {
-      if (i === roomId) {
-        return {
-          cards: room.cards.map((card) => {
-            return card.src === src
-              ? {
-                ...card,
-                opened: false
-              }
-              : card
-          })
-        }
+  async closeCard(store, { roomId }) {
+    const room = { ...store.state.rooms[roomId] }
+
+    room.cards = room.cards.map((card) => {
+      if (card.opened) {
+        return { ...card, opened: false }
       } else {
-        return room
+        return card
       }
     })
+    await this.$axios.$put(`/api/rooms/${roomId}`, room)
+
+    await store.dispatch('fetchRoom', roomId)
+  },
+  async clearCard(store, { roomId, num, prevNum }) {
+    const room = { ...store.state.rooms[roomId] }
+
+    room.cards = room.cards.map((card) => {
+      if (card.num === num || card.num === prevNum) {
+        return { ...card, matched: true }
+      } else {
+        return card
+      }
+    })
+    await this.$axios.$put(`/api/rooms/${roomId}`, room)
+
+    await store.dispatch('fetchRoom', roomId)
   }
 }

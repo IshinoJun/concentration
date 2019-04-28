@@ -3,9 +3,10 @@
     <template v-if="$store.state.rooms[roomId]">
       <img
         v-for="card in $store.state.rooms[roomId].cards"
-        :key="card.src"
-        :src="card.opened ? card.src : backside"
-        @click="openCard(card.src)"
+        :key="card.num"
+        :src="card.opened ? src(card.num) : backside"
+        :style="{ opacity: card.matched ? 0 : 1 }"
+        @click="openCard(card.num)"
       >
       <div class="room-btn-box">
         <nuxt-link
@@ -20,53 +21,45 @@
 </template>
 
 <script>
+const sleep = msec => new Promise(resolve => setTimeout(resolve, msec))
+
 export default {
+  async fetch({ store, route }) {
+    await store.dispatch('checkRoom', +route.params.roomId)
+  },
   computed: {
-    imgList() {
-      const list = []
-      for (let i = 1; i < 53; i += 1) {
-        list.push(require(`../assets/trump/${i}.gif`))
-      }
-      return list
-    },
     roomId() {
       return +this.$route.params.roomId
     },
+    src: () => num => require(`../assets/trump/${num}.gif`),
     backside: () => require('../assets/trump/z01.gif')
-  },
-  created() {
-    if (!this.$store.state.rooms[this.roomId]) {
-      const randomList = [...this.imgList]
-
-      for (let i = randomList.length - 1; i >= 0; i--) {
-        const rand = Math.floor(Math.random() * (i + 1));
-        [randomList[i], randomList[rand]] = [randomList[rand], randomList[i]]
-      }
-
-      this.$store.commit('addRoom', {
-        cards: randomList.map(src => ({
-          src,
-          matched: false,
-          opened: false
-        }))
-      })
-    }
   },
   data() {
     return {
-      count: 0
+      prevNum: null
+    }
+  },
+  async mounted() {
+    while (true) {
+      await this.$store.dispatch('fetchRoom', this.roomId)
+      await sleep(800)
     }
   },
   methods: {
-    openCard(src) {
-      this.count++
-      this.$store.commit('openCard', { roomId: this.roomId, src })
-      if (this.count%2 === 0) {
-        setTimeout(() => {
-          console.log(src)
-          this.$store.commit('closeCard', { roomId: this.roomId, src })
-        }, 2000)
+    async openCard(num) {
+      await this.$store.dispatch('openCard', { roomId: this.roomId, num })
+
+      if (this.$store.state.rooms[this.roomId].turn === 0) {
+        await sleep(1000)
+
+        if (this.prevNum % 13 === num % 13) {
+          await this.$store.dispatch('clearCard', { roomId: this.roomId, num, prevNum: this.prevNum })
+        } else {
+          await this.$store.dispatch('closeCard', { roomId: this.roomId })
+        }
       }
+
+      this.prevNum = num
     }
   }
 }
