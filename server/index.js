@@ -4,12 +4,6 @@ const { Nuxt, Builder } = require('nuxt')
 const bodyParser = require('body-parser')
 const app = express()
 const apiRouter = require('./api')
-// CORSを許可する
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  next();
-});
 
 // Import and Set Nuxt.js options
 const config = require('../nuxt.config.js')
@@ -31,7 +25,13 @@ async function start() {
   } else {
     await nuxt.ready()
   }
-
+  // CORSを許可する
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    next();
+  });
+  
   // Give nuxt middleware to express
   app.use('/api', apiRouter)
   app.use(nuxt.render)
