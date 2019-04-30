@@ -26,10 +26,14 @@ export const actions = {
   },
   async openCard(store, { roomId, num }) {
     const room = { ...store.state.rooms[roomId] }
-    room.turn = 1 - room.turn
     room.cards = room.cards.map((card) => {
       if (card.num === num) {
-        return { ...card, opened: true }
+        if (card.opened == false) {
+          room.turn = 1 - room.turn
+          return { ...card, opened: true }
+        } else {
+          return card
+        }
       } else {
         return card
       }
